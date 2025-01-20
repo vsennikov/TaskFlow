@@ -7,11 +7,13 @@ import (
 
 type Handler struct {
 	registrationController *controllers.RegistrationController
- }
+	loginController *controllers.LoginController
+}
 
-func NewHandler(r *controllers.RegistrationController) *Handler {
+func NewHandler(r *controllers.RegistrationController, l *controllers.LoginController) *Handler {
 	return &Handler{
 		registrationController: r,
+		loginController: l,
 	}
 }
 
@@ -19,6 +21,7 @@ func (h *Handler) InitRouter() {
 	router := gin.Default()
 	
 	router.POST("/registration", h.registrationController.Registration)
+	router.POST("/login", h.loginController.Login)
 
 	router.Run()
- }
+}
