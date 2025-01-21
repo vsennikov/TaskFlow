@@ -13,7 +13,7 @@ type user struct {
 	Password string `gorm:"column:password"`
 }
 
-type task struct {
+type Task struct {
 	gorm.Model
 	UserID    uint   `gorm:"column:user_id"`
 	Title	 string `gorm:"column:title"`

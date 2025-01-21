@@ -24,6 +24,8 @@ func (h *Handler) InitRouter() {
 	router := gin.Default()	
 	router.POST("/registration", h.registrationController.Registration)
 	router.POST("/login", h.loginController.Login)
-	router.POST("/tasks", h.taskController.CreateTask)
+	router.POST("/task", h.taskController.CreateTask)
+	router.GET("/task", h.taskController.GetTask)
+	router.GET("/tasks", h.taskController.GetAllTasks)
 	router.Run()
 }

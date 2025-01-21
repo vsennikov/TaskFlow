@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -28,20 +29,12 @@ type TaskModel struct {
 }
 
 func (t *TaskController) CreateTask(c *gin.Context) {
+	var task TaskModel
 	tokenString := c.GetHeader("Authorization")
-	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "empty token"})
-		return
-	}
-	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-		tokenString = tokenString[7:]
-	}
-	userId, err := t.userService.DecodeToken(tokenString)
+	userId, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
 	}
-	var task TaskModel
 	if err := c.ShouldBindJSON(&task); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -53,4 +46,58 @@ func (t *TaskController) CreateTask(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"task_id": taskId})
+}
+
+func (t *TaskController) GetTask(c *gin.Context) {
+	var taskId struct {
+		TaskId uint `json:"task_id"`
+	}
+	tokenString := c.GetHeader("Authorization")
+	_, err := t.checkToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	if err := c.ShouldBindJSON(&taskId); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	if taskId.TaskId == 0{
+		c.JSON(400, gin.H{"error": "empty task_id"})
+		return
+	}
+	task, err := t.taskService.GetTask(taskId.TaskId)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, task)
+}
+
+func (t *TaskController) GetAllTasks(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	userId, err := t.checkToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	
+	tasks, err := t.taskService.GetAllTasks(userId)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, tasks)
+}
+
+func (t *TaskController) checkToken(token string) (uint, error) {
+	if token == "" {
+		return 0, errors.New("empty token")
+	}
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+	userId, err := t.userService.DecodeToken(token)
+	if err != nil {
+		return 0, errors.New("Unauthorized")
+	}
+	return userId, nil
 }
