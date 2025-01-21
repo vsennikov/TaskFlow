@@ -27,5 +27,7 @@ func (h *Handler) InitRouter() {
 	router.POST("/task", h.taskController.CreateTask)
 	router.GET("/task", h.taskController.GetTask)
 	router.GET("/tasks", h.taskController.GetAllTasks)
+	router.PUT("/task", h.taskController.UpdateTask)
+	router.DELETE("/task", h.taskController.DeleteTask)
 	router.Run()
 }

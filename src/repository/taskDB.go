@@ -16,6 +16,8 @@ type TaskDBInterface interface {
 		priority string, status string, dueDate time.Time) (uint, error)
 	GetTask(taskID uint) (models.TaskJSON, error)
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
+	UpdateTask(taskID uint, updates map[string]interface{}) error
+	DeleteTask(taskID uint) error
 }
 
 func NewTaskDB() *TaskDB {
@@ -62,8 +64,18 @@ func (t *TaskDB) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 	return tasksJSON, nil
 }
 
+func (t *TaskDB) UpdateTask(taskID uint, updates map[string]interface{}) error {
+	err := getTaskDB().Model(&Task{}).Where("id = ?", taskID).Updates(updates).Error
+	return err
+}
+
 func (*TaskDB) transferTask(task Task) (models.TaskJSON) {
 	return models.TaskJSON{TaskID: task.Model.ID, UserID: task.UserID, Title: task.Title,
 		Description: task.Description, Category: task.Category, Priority: task.Priority,
 		Status: task.Status, DueDate: task.DueDate, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
+}
+
+func (*TaskDB) DeleteTask(taskID uint) error {
+	err := getTaskDB().Where("id = ?", taskID).Delete(&Task{}).Error
+	return err
 }

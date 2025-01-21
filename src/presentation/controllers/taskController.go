@@ -20,6 +20,7 @@ func NewTaskController(u services.UserServiceInterface,
 }
 
 type TaskModel struct {
+	TaskId	  	uint      `json:"task_id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Category    string    `json:"category"`
@@ -86,6 +87,55 @@ func (t *TaskController) GetAllTasks(c *gin.Context) {
 		return
 	}
 	c.JSON(200, tasks)
+}
+
+func (t *TaskController) UpdateTask(c *gin.Context) {
+	var updates map[string]interface{}
+	tokenString := c.GetHeader("Authorization")
+	_, err := t.checkToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	if err = c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	taskID := uint(updates["task_id"].(float64))
+	if taskID == 0 {
+		c.JSON(400, gin.H{"error": "empty task_id"})
+		return
+	}
+	delete(updates, "task_id")
+	err = t.taskService.UpdateTask(taskID, updates)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "task updated"})
+}
+
+func (t *TaskController) DeleteTask(c *gin.Context) {
+	var taskId struct {
+		TaskID uint `json:"task_id"`	
+	}
+	tokenString := c.GetHeader("Authorization")
+	_, err := t.checkToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	if err := c.ShouldBindJSON(&taskId); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	if taskId.TaskID == 0 {
+		c.JSON(400, gin.H{"error": "empty task_id"})
+		return
+	}
+	err = t.taskService.DeleteTask(taskId.TaskID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "task deleted"})
 }
 
 func (t *TaskController) checkToken(token string) (uint, error) {

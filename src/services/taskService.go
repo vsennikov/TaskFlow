@@ -17,6 +17,8 @@ type TaskServiceInterface interface {
 		taskCategory string, taskPriority string, taskStatus string, taskDueDate time.Time) (uint, error)
 	GetTask (taskId uint) (models.TaskJSON, error)
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
+	UpdateTask(taskId uint, updates map[string]interface{}) error
+	DeleteTask(taskID uint) error
 }
 
 func NewTaskService(r repository.TaskDBInterface) *TaskService {
@@ -44,4 +46,12 @@ func (t *TaskService) GetTask(taskId uint) (models.TaskJSON, error) {
 
 func (t *TaskService) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 	return t.repository.GetAllTasks(userID)
+}
+
+func (t *TaskService) UpdateTask(taskId uint, updates map[string]interface{}) error {
+	return t.repository.UpdateTask(taskId, updates)
+}
+
+func (t *TaskService) DeleteTask(taskID uint) error {
+	return t.repository.DeleteTask(taskID)
 }
