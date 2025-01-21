@@ -19,12 +19,10 @@ func (l *LoginController) Login(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
 	token, err := l.userService.Login(loginModel.Email, loginModel.Password)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(200, gin.H{"token": token})
 }

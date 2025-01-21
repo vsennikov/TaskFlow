@@ -20,18 +20,16 @@ func NewRegistrationController(u services.UserServiceInterface) *RegistrationCon
 }
 
 func (r *RegistrationController) Registration(c *gin.Context) {
-	var registrationModel RegistrationModel
-	if err := c.ShouldBindJSON(&registrationModel); err != nil {
+	var userData RegistrationModel
+	if err := c.ShouldBindJSON(&userData); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
-	userID, err := r.userService.UserRegistration(registrationModel.Username, registrationModel.Email, registrationModel.Password)
+	userID, err := r.userService.UserRegistration(userData.Username, userData.Email, userData.Password)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(200, gin.H{"user_id": userID})
 }
 

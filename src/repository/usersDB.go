@@ -1,10 +1,6 @@
 package repository
 
 import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,31 +13,8 @@ type UserDBInterface interface {
 type UserDB struct {
 }
 
-type user struct {
-	gorm.Model
-	Username string `json:"username" gorm:"column:username"`
-	Email    string `json:"email" gorm:"column:email;unique"`
-	Password string `json:"password" gorm:"column:password"`
-}
-
 func (user) TableName() string {
 	return "users"
-}
-
-var postgresqlURL string
-
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	postgresqlURL = "host=" + os.Getenv("DB_HOST") +
-		" user=" + os.Getenv("DB_USER") +
-		" password=" + os.Getenv("DB_PASS") +
-		" dbname=" + os.Getenv("DB_NAME") +
-		" port=" + os.Getenv("DB_PORT") +
-		" sslmode=" + os.Getenv("DB_SSLMODE")
 }
 
 func getUserDB() *gorm.DB {
@@ -50,14 +23,12 @@ func getUserDB() *gorm.DB {
 		panic("failed to connect database")
 	}
 	_ = db.AutoMigrate(&user{})
-
 	return db
 }
 
 func (*UserDB) CreateUser(name string, email string, password string) (uint, error) {
 	user := user{Username: name, Email: email, Password: password}
 	err := getUserDB().Save(&user).Error
-
 	return user.Model.ID, err
 }
 

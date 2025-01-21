@@ -8,11 +8,13 @@ import (
 
 
 func InitControllers() {
-	db := repository.UserDB{}
-	userService := services.NewUserService(&db)
+	userDb := repository.UserDB{}
+	taskDb := repository.TaskDB{}
+	userService := services.NewUserService(&userDb)
+	taskService := services.NewTaskService(&taskDb)
 	registrationController := controllers.NewRegistrationController(userService)
 	loginController := controllers.NewLoginController(userService)
-
-	handler := NewHandler(registrationController, loginController)
+	taskController := controllers.NewTaskController(userService, taskService)
+	handler := NewHandler(registrationController, loginController, taskController)
 	handler.InitRouter()
 }
