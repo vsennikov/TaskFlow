@@ -29,5 +29,6 @@ func (h *Handler) InitRouter() {
 	router.GET("/tasks", h.taskController.GetAllTasks)
 	router.PUT("/task", h.taskController.UpdateTask)
 	router.DELETE("/task", h.taskController.DeleteTask)
+	router.GET("/tasks/sequence", h.taskController.GetBySequence)
 	router.Run()
 }

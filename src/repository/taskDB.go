@@ -18,6 +18,7 @@ type TaskDBInterface interface {
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
 	UpdateTask(taskID uint, userID uint, updates map[string]interface{}) error
 	DeleteTask(taskID uint, userID uint) error
+	GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error)
 }
 
 func NewTaskDB() *TaskDB {
@@ -79,3 +80,17 @@ func (*TaskDB) DeleteTask(taskID uint, userID uint) error {
 	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).Delete(&Task{}).Error
 	return err
 }
+
+func (t *TaskDB) GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error) {
+		var tasks []Task
+		var tasksJSON []models.TaskJSON
+
+		err := getTaskDB().Where("user_id = ?", userID).Where(field + " = ?", value).Find(&tasks).Error
+		if err != nil {
+			return nil, err
+		}
+		for _, task := range tasks {
+			tasksJSON = append(tasksJSON, t.transferTask(task))
+		}
+		return tasksJSON, nil
+	}

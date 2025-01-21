@@ -19,6 +19,7 @@ type TaskServiceInterface interface {
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
 	UpdateTask(taskId uint, userID uint, updates map[string]interface{}) error
 	DeleteTask(taskID uint, userID uint) error
+	GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error)
 }
 
 func NewTaskService(r repository.TaskDBInterface) *TaskService {
@@ -54,4 +55,8 @@ func (t *TaskService) UpdateTask(taskId uint, userID uint, updates map[string]in
 
 func (t *TaskService) DeleteTask(taskID uint, userID uint) error {
 	return t.repository.DeleteTask(taskID, userID)
+}
+
+func (t *TaskService) GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error) {
+	return t.repository.GetBySequence(userID, field, value)
 }

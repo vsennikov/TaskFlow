@@ -138,6 +138,34 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "task deleted"})
 }
 
+func (t *TaskController) GetBySequence(c *gin.Context) {
+	var fieldValue map[string]interface{}
+	tokenString := c.GetHeader("Authorization")
+	userID, err := t.checkToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	if err = c.ShouldBindJSON(&fieldValue); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	if len(fieldValue) != 1{
+		c.JSON(400, gin.H{"error": "invalid request"})
+		return
+	}
+	var field string
+	var value interface{}
+	for k, v := range fieldValue {
+		field = k
+		value = v
+	}
+	tasks, err := t.taskService.GetBySequence(userID, field, value)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, tasks)
+}
+
 func (t *TaskController) checkToken(token string) (uint, error) {
 	if token == "" {
 		return 0, errors.New("empty token")
