@@ -15,10 +15,10 @@ type TaskService struct {
 type TaskServiceInterface interface {
 	CreateTask(userID uint, taskName string, taskDescription string, 
 		taskCategory string, taskPriority string, taskStatus string, taskDueDate time.Time) (uint, error)
-	GetTask (taskId uint) (models.TaskJSON, error)
+	GetTask (taskId uint, userID uint) (models.TaskJSON, error)
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
-	UpdateTask(taskId uint, updates map[string]interface{}) error
-	DeleteTask(taskID uint) error
+	UpdateTask(taskId uint, userID uint, updates map[string]interface{}) error
+	DeleteTask(taskID uint, userID uint) error
 }
 
 func NewTaskService(r repository.TaskDBInterface) *TaskService {
@@ -40,18 +40,18 @@ func (t *TaskService) CreateTask(userID uint, taskName string, taskDescription s
 	return t.repository.CreateTask(userID, taskName, taskDescription, taskCategory, taskPriority, taskStatus, taskDueDate)
 }
 
-func (t *TaskService) GetTask(taskId uint) (models.TaskJSON, error) {
-	return t.repository.GetTask(taskId)
+func (t *TaskService) GetTask(taskId uint, userID uint) (models.TaskJSON, error) {
+	return t.repository.GetTask(taskId, userID)
 }
 
 func (t *TaskService) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 	return t.repository.GetAllTasks(userID)
 }
 
-func (t *TaskService) UpdateTask(taskId uint, updates map[string]interface{}) error {
-	return t.repository.UpdateTask(taskId, updates)
+func (t *TaskService) UpdateTask(taskId uint, userID uint, updates map[string]interface{}) error {
+	return t.repository.UpdateTask(taskId, userID, updates)
 }
 
-func (t *TaskService) DeleteTask(taskID uint) error {
-	return t.repository.DeleteTask(taskID)
+func (t *TaskService) DeleteTask(taskID uint, userID uint) error {
+	return t.repository.DeleteTask(taskID, userID)
 }

@@ -54,7 +54,7 @@ func (t *TaskController) GetTask(c *gin.Context) {
 		TaskId uint `json:"task_id"`
 	}
 	tokenString := c.GetHeader("Authorization")
-	_, err := t.checkToken(tokenString)
+	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
@@ -66,7 +66,7 @@ func (t *TaskController) GetTask(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "empty task_id"})
 		return
 	}
-	task, err := t.taskService.GetTask(taskId.TaskId)
+	task, err := t.taskService.GetTask(taskId.TaskId, userID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -92,7 +92,7 @@ func (t *TaskController) GetAllTasks(c *gin.Context) {
 func (t *TaskController) UpdateTask(c *gin.Context) {
 	var updates map[string]interface{}
 	tokenString := c.GetHeader("Authorization")
-	_, err := t.checkToken(tokenString)
+	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
@@ -105,7 +105,7 @@ func (t *TaskController) UpdateTask(c *gin.Context) {
 		return
 	}
 	delete(updates, "task_id")
-	err = t.taskService.UpdateTask(taskID, updates)
+	err = t.taskService.UpdateTask(taskID, userID, updates)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -118,7 +118,7 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 		TaskID uint `json:"task_id"`	
 	}
 	tokenString := c.GetHeader("Authorization")
-	_, err := t.checkToken(tokenString)
+	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
@@ -130,7 +130,7 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "empty task_id"})
 		return
 	}
-	err = t.taskService.DeleteTask(taskId.TaskID)
+	err = t.taskService.DeleteTask(taskId.TaskID, userID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return

@@ -14,10 +14,10 @@ type TaskDB struct {
 type TaskDBInterface interface {
 	CreateTask(userID uint, title string, description string, category string,
 		priority string, status string, dueDate time.Time) (uint, error)
-	GetTask(taskID uint) (models.TaskJSON, error)
+	GetTask(taskID uint, userID uint) (models.TaskJSON, error)
 	GetAllTasks(userID uint) ([]models.TaskJSON, error)
-	UpdateTask(taskID uint, updates map[string]interface{}) error
-	DeleteTask(taskID uint) error
+	UpdateTask(taskID uint, userID uint, updates map[string]interface{}) error
+	DeleteTask(taskID uint, userID uint) error
 }
 
 func NewTaskDB() *TaskDB {
@@ -45,9 +45,9 @@ func (*TaskDB) CreateTask(userID uint, title string, description string, categor
 	return task.Model.ID, err
 }
 
-func (t *TaskDB) GetTask(taskID uint) (models.TaskJSON, error) {
+func (t *TaskDB) GetTask(taskID uint, userID uint) (models.TaskJSON, error) {
 	var task Task
-	err := getTaskDB().Where("id = ?", taskID).First(&task).Error
+	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).First(&task).Error
 	return t.transferTask(task), err
 }
 
@@ -64,8 +64,8 @@ func (t *TaskDB) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 	return tasksJSON, nil
 }
 
-func (t *TaskDB) UpdateTask(taskID uint, updates map[string]interface{}) error {
-	err := getTaskDB().Model(&Task{}).Where("id = ?", taskID).Updates(updates).Error
+func (t *TaskDB) UpdateTask(taskID uint, userID uint, updates map[string]interface{}) error {
+	err := getTaskDB().Model(&Task{}).Where("id = ?", taskID).Where("user_id = ?", userID).Updates(updates).Error
 	return err
 }
 
@@ -75,7 +75,7 @@ func (*TaskDB) transferTask(task Task) (models.TaskJSON) {
 		Status: task.Status, DueDate: task.DueDate, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
-func (*TaskDB) DeleteTask(taskID uint) error {
-	err := getTaskDB().Where("id = ?", taskID).Delete(&Task{}).Error
+func (*TaskDB) DeleteTask(taskID uint, userID uint) error {
+	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).Delete(&Task{}).Error
 	return err
 }
