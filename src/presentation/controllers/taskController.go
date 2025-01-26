@@ -25,18 +25,19 @@ func (t *TaskController) CreateTask(c *gin.Context) {
 	userId, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	if err := c.ShouldBindJSON(&task); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	taskId, err := t.taskService.CreateTask(userId, task.Title, task.Description, 
 		task.Category, task.Priority, task.Status, task.Due_date)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"task_id": taskId})
+	c.JSON(http.StatusOK, gin.H{"task_id": taskId})
 }
 
 func (t *TaskController) GetTask(c *gin.Context) {
@@ -48,21 +49,22 @@ func (t *TaskController) GetTask(c *gin.Context) {
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	if err := c.ShouldBindJSON(&taskId); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if taskId.TaskId == 0{
-		c.JSON(400, gin.H{"error": "empty task_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty task_id"})
 		return
 	}
 	task, err := t.taskService.GetTask(taskId.TaskId, userID)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, task)
+	c.JSON(http.StatusOK, task)
 }
 
 func (t *TaskController) GetAllTasks(c *gin.Context) {
@@ -70,14 +72,15 @@ func (t *TaskController) GetAllTasks(c *gin.Context) {
 	userId, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	
 	tasks, err := t.taskService.GetAllTasks(userId)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, tasks)
+	c.JSON(http.StatusOK, tasks)
 }
 
 func (t *TaskController) UpdateTask(c *gin.Context) {
@@ -87,22 +90,24 @@ func (t *TaskController) UpdateTask(c *gin.Context) {
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	if err = c.ShouldBindJSON(&updates); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	taskID := uint(updates["task_id"].(float64))
 	if taskID == 0 {
-		c.JSON(400, gin.H{"error": "empty task_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty task_id"})
 		return
 	}
 	delete(updates, "task_id")
 	err = t.taskService.UpdateTask(taskID, userID, updates)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"message": "task updated"})
+	c.JSON(http.StatusOK, gin.H{"message": "task updated"})
 }
 
 func (t *TaskController) DeleteTask(c *gin.Context) {
@@ -114,21 +119,22 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	if err := c.ShouldBindJSON(&taskId); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if taskId.TaskID == 0 {
-		c.JSON(400, gin.H{"error": "empty task_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty task_id"})
 		return
 	}
 	err = t.taskService.DeleteTask(taskId.TaskID, userID)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"message": "task deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "task deleted"})
 }
 
 func (t *TaskController) GetBySequence(c *gin.Context) {
@@ -140,12 +146,14 @@ func (t *TaskController) GetBySequence(c *gin.Context) {
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	if err = c.ShouldBindJSON(&fieldValue); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	if len(fieldValue) != 1 {
-		c.JSON(400, gin.H{"error": "invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 	for k, v := range fieldValue {
@@ -154,10 +162,10 @@ func (t *TaskController) GetBySequence(c *gin.Context) {
 	}
 	tasks, err := t.taskService.GetBySequence(userID, field, value)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, tasks)
+	c.JSON(http.StatusOK, tasks)
 }
 
 func (t *TaskController) checkToken(token string) (uint, error) {

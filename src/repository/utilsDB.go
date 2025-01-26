@@ -12,7 +12,7 @@ var postgresqlURL string
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Printf("Error loading .env file: %v", err)
 	}
 	postgresqlURL = "host=" + os.Getenv("DB_HOST") +
 		" user=" + os.Getenv("DB_USER") +

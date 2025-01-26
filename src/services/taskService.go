@@ -12,9 +12,6 @@ type TaskService struct {
 	repository repository.TaskDBInterface
 }
 
-//Should transfer all check from controller to service
-//Should also and check for SQLinjections
-
 type TaskServiceInterface interface {
 	CreateTask(userID uint, taskName string, taskDescription string, 
 		taskCategory string, taskPriority string, taskStatus string, taskDueDate time.Time) (uint, error)
@@ -53,6 +50,12 @@ func (t *TaskService) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 }
 
 func (t *TaskService) UpdateTask(taskId uint, userID uint, updates map[string]interface{}) error {
+	for _,v := range updates {
+		str, _ := v.(string)
+		if containsSQLInjection(str) {
+			return errors.New("input contains invalid characters")
+		}
+	}
 	return t.repository.UpdateTask(taskId, userID, updates)
 }
 
@@ -61,5 +64,12 @@ func (t *TaskService) DeleteTask(taskID uint, userID uint) error {
 }
 
 func (t *TaskService) GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error) {
+	if value == "" {
+		return nil, errors.New("value cannot be empty")
+	}
+	str, _ := value.(string)
+	if containsSQLInjection(str) {
+		return nil, errors.New("input contains invalid characters")
+	}
 	return t.repository.GetBySequence(userID, field, value)
 }
