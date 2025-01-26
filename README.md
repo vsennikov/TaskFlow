@@ -74,3 +74,12 @@ Tasks:
 - `DELETE /api/v1/tasks/{id}` - Delete task
 
 Note: Use the JWT token from login in the `Authorization` header for authenticated endpoints.
+
+### API Documentation
+You can find the complete API documentation in the `taskflow-api.json` file. This file can be imported into Postman for easier API testing and exploration.
+
+To import into Postman:
+1. Open Postman
+2. Click "Import" button
+3. Select the `taskflow-api.json` file
+4. All endpoints will be available in a new collection

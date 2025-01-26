@@ -91,7 +91,7 @@ func generateJWT(userID uint) (string, error) {
 func (u *UserService) DecodeToken(tokenString string) (uint, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Printf("Error loading .env file: %v", err)
 	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
