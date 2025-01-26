@@ -5,12 +5,6 @@ import (
 	"github.com/vsennikov/TaskFlow/src/services"
 )
 
-type RegistrationModel struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
-
 type RegistrationController struct {
 	userService services.UserServiceInterface
 }

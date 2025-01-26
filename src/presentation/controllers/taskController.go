@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vsennikov/TaskFlow/src/services"
@@ -19,18 +18,9 @@ func NewTaskController(u services.UserServiceInterface,
 	return &TaskController{u, t}
 }
 
-type TaskModel struct {
-	TaskId	  	uint      `json:"task_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Category    string    `json:"category"`
-	Priority    string    `json:"priority"`
-	Status 		string    `json:"status"`
-	Due_date    time.Time `json:"due_date"`
-}
-
 func (t *TaskController) CreateTask(c *gin.Context) {
 	var task TaskModel
+	
 	tokenString := c.GetHeader("Authorization")
 	userId, err := t.checkToken(tokenString)
 	if err != nil {
@@ -53,6 +43,7 @@ func (t *TaskController) GetTask(c *gin.Context) {
 	var taskId struct {
 		TaskId uint `json:"task_id"`
 	}
+	
 	tokenString := c.GetHeader("Authorization")
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
@@ -91,6 +82,7 @@ func (t *TaskController) GetAllTasks(c *gin.Context) {
 
 func (t *TaskController) UpdateTask(c *gin.Context) {
 	var updates map[string]interface{}
+
 	tokenString := c.GetHeader("Authorization")
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
@@ -117,6 +109,7 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 	var taskId struct {
 		TaskID uint `json:"task_id"`	
 	}
+
 	tokenString := c.GetHeader("Authorization")
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
@@ -140,6 +133,9 @@ func (t *TaskController) DeleteTask(c *gin.Context) {
 
 func (t *TaskController) GetBySequence(c *gin.Context) {
 	var fieldValue map[string]interface{}
+	var field string
+	var value interface{}
+
 	tokenString := c.GetHeader("Authorization")
 	userID, err := t.checkToken(tokenString)
 	if err != nil {
@@ -148,12 +144,10 @@ func (t *TaskController) GetBySequence(c *gin.Context) {
 	if err = c.ShouldBindJSON(&fieldValue); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
-	if len(fieldValue) != 1{
+	if len(fieldValue) != 1 {
 		c.JSON(400, gin.H{"error": "invalid request"})
 		return
 	}
-	var field string
-	var value interface{}
 	for k, v := range fieldValue {
 		field = k
 		value = v

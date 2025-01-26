@@ -12,6 +12,9 @@ type TaskService struct {
 	repository repository.TaskDBInterface
 }
 
+//Should transfer all check from controller to service
+//Should also and check for SQLinjections
+
 type TaskServiceInterface interface {
 	CreateTask(userID uint, taskName string, taskDescription string, 
 		taskCategory string, taskPriority string, taskStatus string, taskDueDate time.Time) (uint, error)

@@ -25,7 +25,7 @@ func NewTaskDB() *TaskDB {
 	return &TaskDB{}
 }
 
-func (Task) TableName() string {
+func (task) TableName() string {
 	return "tasks"
 }
 
@@ -34,26 +34,26 @@ func getTaskDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	_ = db.AutoMigrate(&Task{})
+	_ = db.AutoMigrate(&task{})
 	return db
 }
 
 func (*TaskDB) CreateTask(userID uint, title string, description string, category string,
 	 priority string, status string, dueDate time.Time) (uint, error) {
-	task := Task{UserID: userID, Title: title, Description: description, Category: category,
+	task := task{UserID: userID, Title: title, Description: description, Category: category,
 		 Priority: priority, Status: status, DueDate: dueDate}
 	err := getTaskDB().Save(&task).Error
 	return task.Model.ID, err
 }
 
 func (t *TaskDB) GetTask(taskID uint, userID uint) (models.TaskJSON, error) {
-	var task Task
+	var task task
 	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).First(&task).Error
 	return t.transferTask(task), err
 }
 
 func (t *TaskDB) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
-	var tasks []Task
+	var tasks []task
 	var tasksJSON []models.TaskJSON
 	err := getTaskDB().Where("user_id = ?", userID).Find(&tasks).Error
 	if err != nil {
@@ -66,23 +66,23 @@ func (t *TaskDB) GetAllTasks(userID uint) ([]models.TaskJSON, error) {
 }
 
 func (t *TaskDB) UpdateTask(taskID uint, userID uint, updates map[string]interface{}) error {
-	err := getTaskDB().Model(&Task{}).Where("id = ?", taskID).Where("user_id = ?", userID).Updates(updates).Error
+	err := getTaskDB().Model(&task{}).Where("id = ?", taskID).Where("user_id = ?", userID).Updates(updates).Error
 	return err
 }
 
-func (*TaskDB) transferTask(task Task) (models.TaskJSON) {
+func (*TaskDB) transferTask(task task) (models.TaskJSON) {
 	return models.TaskJSON{TaskID: task.Model.ID, UserID: task.UserID, Title: task.Title,
 		Description: task.Description, Category: task.Category, Priority: task.Priority,
 		Status: task.Status, DueDate: task.DueDate, CreatedAt: task.CreatedAt, UpdatedAt: task.UpdatedAt}
 }
 
 func (*TaskDB) DeleteTask(taskID uint, userID uint) error {
-	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).Delete(&Task{}).Error
+	err := getTaskDB().Where("id = ?", taskID).Where("user_id = ?", userID).Delete(&task{}).Error
 	return err
 }
 
 func (t *TaskDB) GetBySequence(userID uint, field string, value interface{}) ([]models.TaskJSON, error) {
-		var tasks []Task
+		var tasks []task
 		var tasksJSON []models.TaskJSON
 
 		err := getTaskDB().Where("user_id = ?", userID).Where(field + " = ?", value).Find(&tasks).Error
